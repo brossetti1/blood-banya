@@ -138,14 +138,15 @@ app.get('*', async (req, response) => {
       step.wait(3000)
     }
 
-    log(`Smile, taking screenshot...`)
+    log(`Smile, taking screenshot...${viewportWidth}x${viewportHeight}`)
     context.lastPath = path
 
+    
     const buffer = await step.screenshot({
       x: 0,
       y: 0,
-      width: 450,
-      height: viewportHeight })
+      width: viewportWidth,
+      height: 450 })
 
     // Releasing the browser back to the pool
     await browserPool.release(browserRef)
