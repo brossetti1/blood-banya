@@ -122,7 +122,7 @@ app.get('*', async (req, response) => {
     log(`waitFnName: ${waitFnName}`)
 
     if (waitFnName) {
-      log(`waitFn function specified. Wait 5 seconds for load to complete...`)
+      log(`waitFn function specified. Wait for .lax-editor-root to load...`)
       // step = step.wait(function(fnName) {
       //   console.log(fnName, window)
       //   const fn = window && window[fnName]
@@ -135,7 +135,7 @@ app.get('*', async (req, response) => {
       // }, waitFnName)
       // log(`past step: ${typeof step}, methods: ${step.__proto__}, waitFnValue: ${waitFnValue}, windowFnValue: ${windowFnValue}`)
       step.wait(".lax-editor-root")
-      // step.wait(3000)
+      step.wait(3000)
     }
 
     log(`Smile, taking screenshot...`)
@@ -144,7 +144,7 @@ app.get('*', async (req, response) => {
     const buffer = await step.screenshot({
       x: 0,
       y: 0,
-      width: viewportWidth,
+      width: 450,
       height: viewportHeight })
 
     // Releasing the browser back to the pool
