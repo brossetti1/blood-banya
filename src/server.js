@@ -48,7 +48,7 @@ app.get('*', async (req, response) => {
     log(`New server request ${makeFullUrl(req)}`)
 
     const { width, height, path } = req.query
-    
+
     // if (!path) {
     //   throw new Error('`path` parameter is missing.')
     // }
@@ -107,7 +107,7 @@ app.get('*', async (req, response) => {
 
     const dims = await step
     log(`Dimensions calculated ${dims.width}x${dims.height}`)
-    
+
     const viewportWidth = Number(width || dims.width)
     const viewportHeight = Number(height || dims.height)
 
@@ -122,18 +122,20 @@ app.get('*', async (req, response) => {
     log(`waitFnName: ${waitFnName}`)
 
     if (waitFnName) {
-      log(`waitFn function specified. Wait until the load is complete...`)
-      step = step.wait(function(fnName) {
-        var fn = window[fnName]
-        
-        if (typeof fn !== 'function') {
-          return false
-        }
+      log(`waitFn function specified. Wait 5 seconds for load to complete...`)
+      // step = step.wait(function(fnName) {
+      //   console.log(fnName, window)
+      //   const fn = window && window[fnName]
 
-        return fn()
-      }, waitFnName)
+      //   if (typeof fn !== 'function') {
+      //     return false
+      //   }
 
-      await step
+      //   return fn()
+      // }, waitFnName)
+      // log(`past step: ${typeof step}, methods: ${step.__proto__}, waitFnValue: ${waitFnValue}, windowFnValue: ${windowFnValue}`)
+      step.wait(".lax-editor-root")
+      // step.wait(3000)
     }
 
     log(`Smile, taking screenshot...`)
@@ -155,16 +157,16 @@ app.get('*', async (req, response) => {
     response.send(buffer)
   } catch (error) {
     const stackTrace = error.stack && error.stack.toString()
-    const errorObject = { 
+    const errorObject = {
         name: error.name,
-        error: error.toString(), 
+        error: error.toString(),
         stack: stackTrace
       }
     log(errorObject)
     response
       .status(400)
       .json(errorObject)
-      
+
   }
 })
 
