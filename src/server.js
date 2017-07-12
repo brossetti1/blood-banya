@@ -22,13 +22,14 @@ const poolOptions = {
 const browserPool = genericPool.createPool({
   create: async function () {
     log(`Allocating new browser in the pool, isProduction: ${isProduction}`)
-
+    
     const client = Nightmare({
       // Ensure that sizes are calculated properly
       frame: false,
       useContentSize: true,
       show: !isProduction
     })
+    
     return storage.push(client)
   },
 
@@ -49,9 +50,9 @@ app.get('*', async (req, response) => {
 
     const { width, height, path } = req.query
 
-    // if (!path) {
-    //   throw new Error('`path` parameter is missing.')
-    // }
+    if (!path) {
+      throw new Error('`path` parameter is missing.')
+    }
 
     log(`Snapshot request ${path}`)
 
@@ -76,7 +77,7 @@ app.get('*', async (req, response) => {
 
     await step
     log('Navigation completed. Disabling scroll bar.')
-
+    
     step = step.evaluate(() => {
       try {
         var style = document.createElement('style')
@@ -98,7 +99,7 @@ app.get('*', async (req, response) => {
 
     step = step.evaluate(() => {
       var html = document.documentElement
-
+      console.log(html.scrollHeight)
       return {
         width: html.scrollWidth,
         height: html.scrollHeight
@@ -114,29 +115,8 @@ app.get('*', async (req, response) => {
     // Set the browser's viewport
     step = browser.viewport(viewportWidth, viewportHeight)
 
-    // The `waitFn` query param is the name
-    // of a function on a page, which returns
-    // true as soon as page is loaded
-    const waitFnName = req.query.waitFn
-    // should be isPreviewLoaded
-    log(`waitFnName: ${waitFnName}`)
-
-    if (waitFnName) {
-      log(`waitFn function specified. Wait for .lax-editor-root to load...`)
-      // step = step.wait(function(fnName) {
-      //   console.log(fnName, window)
-      //   const fn = window && window[fnName]
-
-      //   if (typeof fn !== 'function') {
-      //     return false
-      //   }
-
-      //   return fn()
-      // }, waitFnName)
-      // log(`past step: ${typeof step}, methods: ${step.__proto__}, waitFnValue: ${waitFnValue}, windowFnValue: ${windowFnValue}`)
-      step.wait(".lax-editor-root")
-      step.wait(3000)
-    }
+    log(`waitFn function specified. Wait for .lax-editor-root to load...`)
+    await step.wait(".lax-field")
 
     log(`Smile, taking screenshot...${viewportWidth}x${viewportHeight}`)
     context.lastPath = path
@@ -146,7 +126,8 @@ app.get('*', async (req, response) => {
       x: 0,
       y: 0,
       width: viewportWidth,
-      height: 450 })
+      height: viewportHeight
+    })
 
     // Releasing the browser back to the pool
     await browserPool.release(browserRef)
