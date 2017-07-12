@@ -14,6 +14,9 @@
   "author": "Alexey Taktarov <molefrog@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "DISPLAY=:9.0 PORT=80 NODE_ENV=production pm2 start index.js --node-args=\"--harmony\"",
+    "restart": "concurrently pm2 delete index & \"npm run start\"",
+    "logs": "pm2 logs --lines=1000"
   }
 }

@@ -21,7 +21,7 @@ const poolOptions = {
 
 const browserPool = genericPool.createPool({
   create: async function () {
-    log('Allocating new browser in the pool')
+    log(`Allocating new browser in the pool, isProduction: ${isProduction}`)
 
     const client = Nightmare({
       // Ensure that sizes are calculated properly
@@ -48,10 +48,10 @@ app.get('*', async (req, response) => {
     log(`New server request ${makeFullUrl(req)}`)
 
     const { width, height, path } = req.query
-
-    if (!path) {
-      throw new Error('`path` parameter is missing.')
-    }
+    
+    // if (!path) {
+    //   throw new Error('`path` parameter is missing.')
+    // }
 
     log(`Snapshot request ${path}`)
 
@@ -107,7 +107,7 @@ app.get('*', async (req, response) => {
 
     const dims = await step
     log(`Dimensions calculated ${dims.width}x${dims.height}`)
-
+    
     const viewportWidth = Number(width || dims.width)
     const viewportHeight = Number(height || dims.height)
 
@@ -118,12 +118,14 @@ app.get('*', async (req, response) => {
     // of a function on a page, which returns
     // true as soon as page is loaded
     const waitFnName = req.query.waitFn
+    // should be isPreviewLoaded
+    log(`waitFnName: ${waitFnName}`)
 
     if (waitFnName) {
       log(`waitFn function specified. Wait until the load is complete...`)
-      step = step.wait(function (fnName) {
+      step = step.wait(function(fnName) {
         var fn = window[fnName]
-
+        
         if (typeof fn !== 'function') {
           return false
         }
@@ -152,9 +154,17 @@ app.get('*', async (req, response) => {
     response.attachment('boo.png')
     response.send(buffer)
   } catch (error) {
+    const stackTrace = error.stack && error.stack.toString()
+    const errorObject = { 
+        name: error.name,
+        error: error.toString(), 
+        stack: stackTrace
+      }
+    log(errorObject)
     response
       .status(400)
-      .json({ error: error.toString() })
+      .json(errorObject)
+      
   }
 })
 
